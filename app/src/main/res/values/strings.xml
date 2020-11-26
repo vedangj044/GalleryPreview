@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">GalleryPreview</string>
+    <string name="pictures">Pictures</string>
+    <string name="videos">Videos</string>
+    <string name="recent">Recent</string>
+    <string name="thunbnail">thunbnail</string>
+    <string name="interaction">interaction</string>
+</resources>
