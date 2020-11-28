@@ -159,7 +159,6 @@ public class ImageStatusObject {
             if(!this.toString().equals(obj.toString())){
                 Log.v("comparisonFalse", this.toString() + ">>>" + obj.toString());
             }
-            Log.v("comparisonTruee", this.toString() + ">>>" + obj.toString());
             return this.toString().equals(obj.toString());
         }
         return false;

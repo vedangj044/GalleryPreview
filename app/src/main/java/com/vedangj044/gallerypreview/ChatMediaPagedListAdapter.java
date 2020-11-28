@@ -26,10 +26,12 @@ public class ChatMediaPagedListAdapter extends PagedListAdapter<ImageStatusObjec
     private static final int TYPE_MEDIA_SENDER = 1;
     private static final int TYPE_MEDIA_RECEIVER = 2;
     private DownloadHelper downloadHelper;
+    private UploadHelper uploadHelper;
 
-    protected ChatMediaPagedListAdapter(@NonNull DiffUtil.ItemCallback<ImageStatusObject> diffCallback, DownloadHelper downloadHelper) {
+    protected ChatMediaPagedListAdapter(@NonNull DiffUtil.ItemCallback<ImageStatusObject> diffCallback, DownloadHelper downloadHelper, UploadHelper uploadHelper) {
         super(diffCallback);
         this.downloadHelper = downloadHelper;
+        this.uploadHelper = uploadHelper;
     }
 
     @NonNull
@@ -82,7 +84,14 @@ public class ChatMediaPagedListAdapter extends PagedListAdapter<ImageStatusObjec
 
                     hold.thumbnailImage.setImageBitmap(setThumbnail(img.getThumbnailURL()));
                     hold.retryButton.setImageResource(R.drawable.ic_download_foreground);
-                    hold.retryButton.setOnClickListener(v -> downloadHelper.enqueue(img));
+                    hold.retryButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            downloadHelper.enqueue(img);
+                            hold.retryButton.setVisibility(View.GONE);
+                            hold.uploadProgress.setVisibility(View.VISIBLE);
+                        }
+                    });
 
                     visibilityStateArray = "VVG";
                     break;
@@ -111,6 +120,7 @@ public class ChatMediaPagedListAdapter extends PagedListAdapter<ImageStatusObjec
                 case ImageStatusObject.DOWNLOAD_RETRY:
                     hold.thumbnailImage.setImageBitmap(setThumbnail(img.getThumbnailURL()));
                     hold.retryButton.setImageResource(R.drawable.ic_retry_foreground);
+                    hold.retryButton.setOnClickListener(v -> downloadHelper.enqueue(img));
                     visibilityStateArray = "VVG";
                     break;
             }
@@ -148,6 +158,7 @@ public class ChatMediaPagedListAdapter extends PagedListAdapter<ImageStatusObjec
                 case ImageStatusObject.UPLOAD_RETRY:
                     hold.thumbnailImage.setImageBitmap(setThumbnail(img.getThumbnailURL()));
                     hold.retryButton.setImageResource(R.drawable.ic_retry_foreground);
+                    hold.retryButton.setOnClickListener(v -> uploadHelper.uploadFile(img));
                     visibilityStateArray = "VVG";
                     break;
             }

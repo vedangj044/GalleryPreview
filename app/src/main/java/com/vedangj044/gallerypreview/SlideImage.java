@@ -3,6 +3,9 @@ package com.vedangj044.gallerypreview;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MediatorLiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -78,8 +81,6 @@ public class SlideImage extends AppCompatActivity {
 
     private int groupID;
 
-    private ExecutorService executor = ExecutorHelper.getInstanceExecutor();
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -88,8 +89,8 @@ public class SlideImage extends AppCompatActivity {
         // unique group id for each instance
         groupID = genGroupID();
 
-        // database instance
-        MediaUploadDatabase mediaUploadDatabase = MediaUploadDatabase.getInstance(this);
+        // Database connectivity
+        ChatMediaDaoMiddleware chatMediaDaoMiddleware = ChatMediaDaoMiddleware.getInstance(getApplicationContext());
 
         mediaPreviewsList = new ArrayList<>();
 
@@ -195,6 +196,7 @@ public class SlideImage extends AppCompatActivity {
 
                 // FINAL LIST containing all the url required to sent to server
                 List<ImageStatusObject> compressedPath = new ArrayList<>();
+                MutableLiveData<Integer> size = new MutableLiveData<>();
 
                 // Iteration to mediaPreviewList
                 for(MediaPreview m1: mediaPreviewsList){
@@ -237,8 +239,9 @@ public class SlideImage extends AppCompatActivity {
 
                                     // when compression is complete the compressPath list is updated
                                     ImageStatusObject img1 = new ImageStatusObject(thumbnail, VideoConverter.cachedFile.getPath(), true, name.getName(), groupID, true);
-                                    mediaUploadDatabase.mediaUploadDAO().insetImageStatusObject(img1);
+                                    chatMediaDaoMiddleware.insertChatMedia(img1);
                                     compressedPath.add(img1);
+                                    size.setValue(compressedPath.size());
 
                                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                                         @Override
@@ -284,57 +287,33 @@ public class SlideImage extends AppCompatActivity {
                         // Creating image status object and adding to list
                         ImageStatusObject img1 = new ImageStatusObject(base64Thumbnail, output.getAbsolutePath(), false, m1.getFileName(), groupID, true);
 
-                        Future<Void> task =  executor.submit(new Callable<Void>() {
-                            @Override
-                            public Void call() throws Exception {
-                                mediaUploadDatabase.mediaUploadDAO().insetImageStatusObject(img1);
-                                return null;
-                            }
-                        });
-
-                        try {
-                            task.get();
-                        }
-                        catch (Exception e){
-                            e.printStackTrace();
-                        }
+                        chatMediaDaoMiddleware.insertChatMedia(img1);
 
                         compressedPath.add(img1);
+                        size.setValue(compressedPath.size());
 
                     }
 
                 }
+
+                size.observe(SlideImage.this, new Observer<Integer>() {
+                    @Override
+                    public void onChanged(Integer integer) {
+                        Intent intent = new Intent(SlideImage.this, ChatActivity.class);
+                        intent.putExtra("groupID", groupID);
+                        startActivity(intent);
+                        finish();
+                    }
+                });
+
             }
         });
 
-        mediaUploadDatabase.mediaUploadDAO().getCountByGroupID(groupID).observe(this, new Observer<Integer>() {
-            @Override
-            public void onChanged(Integer integer) {
-                if(integer == mediaPreviewsList.size()){
-                    Intent intent = new Intent(SlideImage.this, ChatActivity.class);
-                    intent.putExtra("groupID", groupID);
-                    startActivity(intent);
-                    finish();
-                }
-            }
-        });
     }
 
     public int genGroupID(){
         Random r = new Random(System.currentTimeMillis());
         return 10000 + r.nextInt(20000);
-    }
-
-    public static class ExecutorHelper{
-
-        private static ExecutorService instanceExecutor;
-
-        public static synchronized ExecutorService getInstanceExecutor(){
-            if(instanceExecutor == null){
-                instanceExecutor = Executors.newSingleThreadExecutor();
-            }
-            return instanceExecutor;
-        }
     }
 
 

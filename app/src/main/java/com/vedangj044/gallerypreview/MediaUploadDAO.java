@@ -19,14 +19,8 @@ public interface MediaUploadDAO {
     @Query("SELECT COUNT(*) FROM chatMedia WHERE groupID == :id")
     LiveData<Integer> getCountByGroupID(int id);
 
-    @Query("UPDATE chatMedia SET state = :response WHERE groupID =:id AND fileName = :name")
-    int updateUploadStatus(int response, int id, String name);
-
     @Update
     int update(ImageStatusObject imageStatusObject);
-
-    @Query("SELECT * FROM chatMedia")
-    LiveData<List<ImageStatusObject>> getMedia();
 
     @Query("SELECT * FROM chatMedia ORDER BY id DESC")
     DataSource.Factory<Integer, ImageStatusObject> getPagedMedia();
@@ -34,6 +28,10 @@ public interface MediaUploadDAO {
     @Insert
     void insetImageStatusObject(ImageStatusObject imageStatusObject);
 
-    @Delete
-    void deleteImageStatusObject(ImageStatusObject imageStatusObject);
+    @Query("UPDATE chatMedia SET state = 6 WHERE state = 5")
+    void cancelAllDownloads();
+
+    @Query("UPDATE chatMedia SET state = 2 WHERE state = 1")
+    void cancelAllUploads();
+
 }
