@@ -3,9 +3,11 @@ package com.vedangj044.gallerypreview;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
@@ -16,10 +18,13 @@ import androidx.paging.PagedListAdapter;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
+import retrofit2.http.POST;
+
 
 public class ChatMediaPagedListAdapter extends PagedListAdapter<ImageStatusObject, RecyclerView.ViewHolder> {
 
-    private static final int TYPE_MEDIA = 1;
+    private static final int TYPE_MEDIA_SENDER = 1;
+    private static final int TYPE_MEDIA_RECEIVER = 2;
     private DownloadHelper downloadHelper;
 
     protected ChatMediaPagedListAdapter(@NonNull DiffUtil.ItemCallback<ImageStatusObject> diffCallback, DownloadHelper downloadHelper) {
@@ -30,90 +35,141 @@ public class ChatMediaPagedListAdapter extends PagedListAdapter<ImageStatusObjec
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.chat_media_item, parent, false);
-        return new MediaViewHolder(view);
+
+        if(viewType == TYPE_MEDIA_SENDER){
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.chat_media_interaction, parent, false);
+            return new MediaViewHolderSender(view);
+        }
+        else{
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.chat_media_item, parent, false);
+            return new MediaViewHolderReceiver(view);
+        }
+
+
     }
 
     @Override
     public int getItemViewType(int position) {
-        return TYPE_MEDIA;
+        if(getItem(position).isSender()){
+            return TYPE_MEDIA_SENDER;
+        }
+        else{
+            return TYPE_MEDIA_RECEIVER;
+        }
     }
+
+    private String visibilityStateArray = "GGG";
+    // G -> GONE | V -> VISIBLE | I -> INVISIBLE
+
+    // Index -> view
+    // 1 -> thumbnailImage
+    // 2 -> retryButton
+    // 3 -> uploadProgress
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
 
         ImageStatusObject img = getItem(position);
-        MediaViewHolder hold = (MediaViewHolder) holder;
 
-        ConstraintSet set = new ConstraintSet();
-        set.clone(hold.layout);
+        if(getItemViewType(position) == TYPE_MEDIA_RECEIVER){
 
-        assert img != null;
-        if(img.isSender()){
-            set.clear(hold.originalImage.getId(), ConstraintSet.START);
-        }
-        else{
-            set.clear(hold.originalImage.getId(), ConstraintSet.END);
-        }
+            MediaViewHolderReceiver hold = (MediaViewHolderReceiver) holder;
 
-        set.applyTo(hold.layout);
+            switch (img.getState()){
 
-        // Original image is set in invisible
-        if(!img.getVideo() && img.isSender()){
-            Bitmap bmp = BitmapFactory.decodeFile(img.getImageURL());
-            hold.originalImage.setImageBitmap(bmp);
-        }
+                case ImageStatusObject.DOWNLOAD_NOT_STARTED:
+                    Log.v("callled", "claslls1111");
 
-        if (img.getState() == ImageStatusObject.UPLOAD_PROCESS){
+                    hold.thumbnailImage.setImageBitmap(setThumbnail(img.getThumbnailURL()));
+                    hold.retryButton.setImageResource(R.drawable.ic_download_foreground);
+                    hold.retryButton.setOnClickListener(v -> downloadHelper.enqueue(img));
 
-            hold.thumbnailImage.setImageBitmap(setThumbnail(img.getThumbnailURL()));
+                    visibilityStateArray = "VVG";
+                    break;
 
-            // Uploading
-            hold.uploadProgress.setVisibility(View.VISIBLE);
-            hold.retryButton.setVisibility(View.GONE);
-        }
+                case ImageStatusObject.DOWNLOAD_PROCESS:
+                    Log.v("callled", "claslls");
+                    hold.thumbnailImage.setImageBitmap(setThumbnail(img.getThumbnailURL()));
+                    visibilityStateArray = "VGV";
+                    break;
 
-        if(img.getState() == ImageStatusObject.DOWNLOAD_NOT_STARTED){
-            hold.thumbnailImage.setImageBitmap(setThumbnail(img.getThumbnailURL()));
-            hold.uploadProgress.setVisibility(View.GONE);
-            hold.retryButton.setImageResource(R.drawable.ic_download_foreground);
-            hold.retryButton.setVisibility(View.VISIBLE);
+                case ImageStatusObject.DOWNLOAD_DONE:
 
-            hold.retryButton.setOnClickListener(v -> downloadHelper.enqueue(img));
-        }
+                    if (img.getVideo()){
+                        hold.thumbnailImage.setImageBitmap(setThumbnail(img.getThumbnailURL()));
+                        hold.retryButton.setImageResource(R.drawable.ic_play_foreground);
+                        visibilityStateArray = "VVG";
+                    }
+                    else{
+                        hold.originalImage.setImageBitmap(BitmapFactory.decodeFile(img.getImageURL()));
+                        hold.thumbnailImage.setImageBitmap(BitmapFactory.decodeFile(img.getImageURL()));
+                        visibilityStateArray = "VGG";
+                    }
 
-        if(img.getState() == ImageStatusObject.DOWNLOAD_PROCESS){
+                    break;
 
-            hold.uploadProgress.setVisibility(View.VISIBLE);
-            hold.retryButton.setVisibility(View.GONE);
-
-        }
-
-        if(img.getState() == ImageStatusObject.DOWNLOAD_RETRY || img.getState() == ImageStatusObject.UPLOAD_RETRY){
-
-            hold.retryButton.setImageResource(R.drawable.ic_retry_foreground);
-            hold.retryButton.setVisibility(View.VISIBLE);
-            hold.uploadProgress.setVisibility(View.GONE);
-
-        }
-
-        if(img.getState() == ImageStatusObject.UPLOAD_DONE || img.getState() == ImageStatusObject.DOWNLOAD_DONE){
-
-            hold.uploadProgress.setVisibility(View.GONE);
-            hold.retryButton.setVisibility(View.GONE);
-
-            if(img.getVideo()){
-                hold.retryButton.setImageResource(R.drawable.ic_play_foreground);
-                hold.retryButton.setVisibility(View.VISIBLE);
-            }
-            else{
-                hold.thumbnailImage.setVisibility(View.GONE);
-                hold.originalImage.setVisibility(View.VISIBLE);
+                case ImageStatusObject.DOWNLOAD_RETRY:
+                    hold.thumbnailImage.setImageBitmap(setThumbnail(img.getThumbnailURL()));
+                    hold.retryButton.setImageResource(R.drawable.ic_retry_foreground);
+                    visibilityStateArray = "VVG";
+                    break;
             }
 
-            // Intent
+            hold.thumbnailImage.setVisibility(valueVisibility(visibilityStateArray.charAt(0)));
+            hold.retryButton.setVisibility(valueVisibility(visibilityStateArray.charAt(1)));
+            hold.uploadProgress.setVisibility(valueVisibility(visibilityStateArray.charAt(2)));
+
+        }
+        else {
+            MediaViewHolderSender hold = (MediaViewHolderSender) holder;
+
+            switch (img.getState()) {
+                case ImageStatusObject.UPLOAD_PROCESS:
+                    if (!img.getVideo()) {
+                        hold.originalImage.setImageBitmap(BitmapFactory.decodeFile(img.getImageURL()));
+                    }
+                    hold.thumbnailImage.setImageBitmap(setThumbnail(img.getThumbnailURL()));
+                    visibilityStateArray = "VGV";
+                    break;
+
+                case ImageStatusObject.UPLOAD_DONE:
+
+                    if (img.getVideo()) {
+                        hold.thumbnailImage.setImageBitmap(setThumbnail(img.getThumbnailURL()));
+                        hold.retryButton.setImageResource(R.drawable.ic_play_foreground);
+                        visibilityStateArray = "VVG";
+                    } else {
+                        hold.originalImage.setImageBitmap(BitmapFactory.decodeFile(img.getImageURL()));
+                        hold.thumbnailImage.setImageBitmap(BitmapFactory.decodeFile(img.getImageURL()));
+                        visibilityStateArray = "VGG";
+                    }
+                    break;
+
+                case ImageStatusObject.UPLOAD_RETRY:
+                    hold.thumbnailImage.setImageBitmap(setThumbnail(img.getThumbnailURL()));
+                    hold.retryButton.setImageResource(R.drawable.ic_retry_foreground);
+                    visibilityStateArray = "VVG";
+                    break;
+            }
+
+            hold.thumbnailImage.setVisibility(valueVisibility(visibilityStateArray.charAt(0)));
+            hold.retryButton.setVisibility(valueVisibility(visibilityStateArray.charAt(1)));
+            hold.uploadProgress.setVisibility(valueVisibility(visibilityStateArray.charAt(2)));
         }
 
+
+    }
+
+    private int valueVisibility(char s){
+        if(s == 'V'){
+            return View.VISIBLE;
+        }
+        else if(s == 'G'){
+            return View.GONE;
+        }
+        else {
+            return View.INVISIBLE;
+        }
     }
 
     private Bitmap setThumbnail(String thumbnailURL){
@@ -126,7 +182,7 @@ public class ChatMediaPagedListAdapter extends PagedListAdapter<ImageStatusObjec
         return super.getItemCount();
     }
 
-    public static class MediaViewHolder extends RecyclerView.ViewHolder{
+    public static class MediaViewHolderReceiver extends RecyclerView.ViewHolder{
 
         ImageView thumbnailImage;
         ImageView retryButton;
@@ -134,7 +190,27 @@ public class ChatMediaPagedListAdapter extends PagedListAdapter<ImageStatusObjec
         ImageView originalImage;
         ConstraintLayout layout;
 
-        public MediaViewHolder(@NonNull View itemView) {
+        public MediaViewHolderReceiver(@NonNull View itemView) {
+            super(itemView);
+
+            thumbnailImage = itemView.findViewById(R.id.thumbnail_image_media);
+            retryButton = itemView.findViewById(R.id.retry_button);
+            uploadProgress = itemView.findViewById(R.id.upload_progress);
+            originalImage = itemView.findViewById(R.id.background_image);
+            layout = itemView.findViewById(R.id.layout_item);
+
+        }
+    }
+
+    public static class MediaViewHolderSender extends RecyclerView.ViewHolder{
+
+        ImageView thumbnailImage;
+        ImageView retryButton;
+        ProgressBar uploadProgress;
+        ImageView originalImage;
+        ConstraintLayout layout;
+
+        public MediaViewHolderSender(@NonNull View itemView) {
             super(itemView);
 
             thumbnailImage = itemView.findViewById(R.id.thumbnail_image_media);

@@ -23,7 +23,6 @@ public class DownloadHelper {
     private ExecutorService executor = SlideImage.ExecutorHelper.getInstanceExecutor();
     private MediaUploadDatabase mediaUploadDatabase;
 
-    private OnDownloadCompleteListner listner;
 
     private BroadcastReceiver onDownloadComplete = new BroadcastReceiver() {
         @Override
@@ -37,20 +36,11 @@ public class DownloadHelper {
                 img.setState(ImageStatusObject.DOWNLOAD_DONE);
 
                 updateStatus(img);
-                listner.onComplete();
             }
 
         }
     };
 
-    public interface OnDownloadCompleteListner{
-        void onComplete();
-        void onStart();
-    }
-
-    public void setListner(OnDownloadCompleteListner listner) {
-        this.listner = listner;
-    }
 
     public DownloadHelper(Context context) {
         this.mContext = context;
@@ -84,11 +74,11 @@ public class DownloadHelper {
 
         long downloadID = this.dm.enqueue(request);
 
+        Log.v("changed", img.toString());
         img.setState(ImageStatusObject.DOWNLOAD_PROCESS);
-        updateStatus(img);
-        listner.onStart();
-
+        path = path.substring(7);
         img.setImageURL(path);
+        updateStatus(img);
         listOfQueuedDownloads.put(downloadID, img);
 
     }
@@ -97,7 +87,9 @@ public class DownloadHelper {
         Future<Void> task = executor.submit(new Callable<Void>() {
             @Override
             public Void call() throws Exception {
-                mediaUploadDatabase.mediaUploadDAO().update(img);
+
+                int i = mediaUploadDatabase.mediaUploadDAO().update(img);
+                Log.v("changed1", img.toString() + "____" + i);
                 return null;
             }
         });

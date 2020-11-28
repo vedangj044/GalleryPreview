@@ -19,10 +19,7 @@ public class ChatMediaViewModel extends AndroidViewModel {
         this.application = application;
         DataSource.Factory<Integer, ImageStatusObject> fine = MediaUploadDatabase.getInstance(application).mediaUploadDAO().getPagedMedia();
 
-        LivePagedListBuilder<Integer, ImageStatusObject> paged = new LivePagedListBuilder<Integer, ImageStatusObject>(fine, 10);
-
-        imageStatusObjectPaged = paged.build();
-
+        imageStatusObjectPaged = new LivePagedListBuilder<>(fine, 10).build();
     }
 
     public LiveData<PagedList<ImageStatusObject>> getImageStatusObjectPaged() {

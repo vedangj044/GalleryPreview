@@ -112,9 +112,9 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public Void call() throws Exception {
                 List<ImageStatusObject> lo = mediaUploadDatabase.mediaUploadDAO().getMediaByGroup(groupID);
-                for (ImageStatusObject img: lo){
-                    uploadFile(img);
-                }
+//                for (ImageStatusObject img: lo){
+//                    uploadFile(img);
+//                }
                 img1[0] = lo.get(0);
                 return null;
             }
@@ -158,7 +158,9 @@ public class ChatActivity extends AppCompatActivity {
                         img1[0].setId(img1[0].getId()+1);
                         img1[0].setState(ImageStatusObject.DOWNLOAD_NOT_STARTED);
                         img1[0].setSender(false);
-                        img1[0].setImageURL(url);
+                        img1[0].setImageURL("https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4");
+                        img1[0].setVideo(true);
+                        img1[0].setFileName("videoOne.mp4");
                         mediaUploadDatabase.mediaUploadDAO().insetImageStatusObject(img1[0]);
                         return null;
                     }
@@ -166,18 +168,6 @@ public class ChatActivity extends AppCompatActivity {
             }
         };
         cnt.start();
-
-        downloadHelper.setListner(new DownloadHelper.OnDownloadCompleteListner() {
-            @Override
-            public void onComplete() {
-                viewModel.invalidate();
-            }
-
-            @Override
-            public void onStart() {
-                viewModel.invalidate();
-            }
-        });
 
     }
 
@@ -218,7 +208,6 @@ public class ChatActivity extends AppCompatActivity {
                     url = response.body().getData().get(0);
                     imageStatusObject.setState(ImageStatusObject.UPLOAD_DONE);
                     updateStatus(imageStatusObject);
-                    viewModel.invalidate();
 
                 }
 

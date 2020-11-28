@@ -145,11 +145,8 @@ public class ImageStatusObject {
     public String toString() {
         return "ImageStatusObject{" +
                 "id=" + id +
-                ", thumbnailURL='" + thumbnailURL + '\'' +
-                ", ImageURL='" + ImageURL + '\'' +
                 ", isVideo=" + isVideo +
                 ", state=" + state +
-                ", groupID=" + groupID +
                 ", fileName='" + fileName + '\'' +
                 ", isSender=" + isSender +
                 '}';
@@ -159,6 +156,10 @@ public class ImageStatusObject {
     public boolean equals(@Nullable Object obj) {
         assert obj != null;
         if(obj.getClass() == ImageStatusObject.class && obj.toString() != null){
+            if(!this.toString().equals(obj.toString())){
+                Log.v("comparisonFalse", this.toString() + ">>>" + obj.toString());
+            }
+            Log.v("comparisonTruee", this.toString() + ">>>" + obj.toString());
             return this.toString().equals(obj.toString());
         }
         return false;
