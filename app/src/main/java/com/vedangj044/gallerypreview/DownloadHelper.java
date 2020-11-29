@@ -43,11 +43,7 @@ public class DownloadHelper {
                 if(isSuccessfull(id)){
                     ImageStatusObject img = listOfQueuedDownloads.get(id);
                     img.setState(ImageStatusObject.DOWNLOAD_DONE);
-                    updateStatus(img);
-                }
-                else{
-                    ImageStatusObject img = listOfQueuedDownloads.get(id);
-                    img.setState(ImageStatusObject.DOWNLOAD_RETRY);
+                    img.setImageURL(Environment.DIRECTORY_DOWNLOADS + getPath(img.getVideo(), img.getFileName()));
                     updateStatus(img);
                 }
             }
@@ -61,6 +57,8 @@ public class DownloadHelper {
             ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo activeNetwork = manager.getActiveNetworkInfo();
             boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+
+            Log.v("ima", "net");
 
             if(!isConnected){
                 for (Map.Entry element: listOfQueuedDownloads.entrySet()){
@@ -89,15 +87,21 @@ public class DownloadHelper {
         context.registerReceiver(networkStateReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
     }
 
-    public void enqueue(ImageStatusObject img){
-
+    private String getPath(boolean isVideo, String filename){
         String path = "/ithubImages/";
 
-        if(img.getVideo()){
+        if(isVideo){
             path =  "/ithubVideos/";
         }
 
-        path += img.getFileName();
+        path += filename;
+
+        return path;
+    }
+
+    public void enqueue(ImageStatusObject img){
+
+        String path = getPath(img.getVideo(), img.getFileName());
 
         File temp_file = new File(path);
         if(!temp_file.exists()){
@@ -114,12 +118,11 @@ public class DownloadHelper {
         Log.v("changed", img.toString());
         img.setState(ImageStatusObject.DOWNLOAD_PROCESS);
         updateStatus(img);
-        img.setImageURL(Environment.DIRECTORY_DOWNLOADS + path);
         listOfQueuedDownloads.put(downloadID, img);
 
     }
 
-    private void updateStatus(ImageStatusObject img){
+    private void updateStatus(final ImageStatusObject img){
 
         chatMediaDaoMiddleware.updateChatMedia(img);
 

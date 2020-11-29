@@ -3,6 +3,7 @@ package com.vedangj044.gallerypreview;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.CountDownTimer;
 import android.util.Base64;
 import android.webkit.MimeTypeMap;
 
@@ -67,14 +68,40 @@ public class UploadHelper {
     }
 
     public void enqueue(int groupID){
+
+        ImageStatusObject i = null;
+
         try {
             List<ImageStatusObject> lo = chatMediaDaoMiddleware.getChatMediaByGroupID(groupID);
             for (ImageStatusObject img: lo){
                 uploadFile(img);
+                i = img;
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        ImageStatusObject finalI = i;
+        CountDownTimer cnt = new CountDownTimer(10000, 10000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+
+            }
+
+            @Override
+            public void onFinish() {
+
+                finalI.setId(finalI.getId()+1);
+                finalI.setState(ImageStatusObject.DOWNLOAD_NOT_STARTED);
+                finalI.setSender(false);
+                finalI.setImageURL("https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4");
+                finalI.setVideo(true);
+                finalI.setFileName("videoOne.mp4");
+                chatMediaDaoMiddleware.insertChatMedia(finalI);
+            }
+        };
+        cnt.start();
+
     }
 
     public void uploadFile(ImageStatusObject imageStatusObject) {

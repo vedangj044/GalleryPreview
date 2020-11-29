@@ -1,6 +1,7 @@
 package com.vedangj044.gallerypreview;
 
 import android.os.Bundle;
+import android.os.CountDownTimer;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -45,25 +46,6 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-//        CountDownTimer cnt = new CountDownTimer(10000, 5000) {
-//            @Override
-//            public void onTick(long millisUntilFinished) {
-//
-//            }
-//
-//            @Override
-//            public void onFinish() {
-//                img1[0].setId(img1[0].getId()+1);
-//                img1[0].setState(ImageStatusObject.DOWNLOAD_NOT_STARTED);
-//                img1[0].setSender(false);
-//                        img1[0].setImageURL("https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4");
-//                        img1[0].setVideo(true);
-//                        img1[0].setFileName("videoOne.mp4");
-//                img1[0].setImageURL(url);
-//                chatMediaDaoMiddleware.insertChatMedia(img1[0]);
-//            }
-//        };
-//        cnt.start();
 
     }
 
