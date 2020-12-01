@@ -74,7 +74,7 @@ public class UploadHelper {
         try {
             List<ImageStatusObject> lo = chatMediaDaoMiddleware.getChatMediaByGroupID(groupID);
             for (ImageStatusObject img: lo){
-                uploadFile(img);
+//                uploadFile(img);
                 i = img;
             }
         } catch (Exception e) {

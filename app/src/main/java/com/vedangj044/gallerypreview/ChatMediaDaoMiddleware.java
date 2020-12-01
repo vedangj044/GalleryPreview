@@ -68,9 +68,6 @@ class ChatMediaDaoMiddleware{
         return executor.submit(fetch).get();
     }
 
-    public LiveData<Integer> getCountChatMediaByGroupID(int groupID){
-        return mediaUploadDatabase.mediaUploadDAO().getCountByGroupID(groupID);
-    }
 
     public DataSource.Factory<Integer, ImageStatusObject> getPagedList(){
         return mediaUploadDatabase.mediaUploadDAO().getPagedMedia();
@@ -92,5 +89,27 @@ class ChatMediaDaoMiddleware{
         };
 
         executor.submit(cancel);
+    }
+
+    public void updateMediaByID(String path, String ide, int response){
+
+        int id = Integer.parseInt(ide);
+
+        Callable<Void> task = () -> {
+            mediaUploadDatabase.mediaUploadDAO().updateById(response, id);
+            return null;
+        };
+
+        executor.submit(task);
+
+        if(path != null){
+            Callable<Void> ty = () -> {
+                    mediaUploadDatabase.mediaUploadDAO().updateFilePath(path, id);
+                    return null;
+            };
+
+            executor.submit(ty);
+        }
+
     }
 }

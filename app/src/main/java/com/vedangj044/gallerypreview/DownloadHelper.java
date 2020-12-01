@@ -6,6 +6,8 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.media.Image;
 import android.media.MediaScannerConnection;
 import android.net.ConnectivityManager;
@@ -18,7 +20,9 @@ import android.util.Log;
 import android.webkit.MimeTypeMap;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -30,7 +34,7 @@ public class DownloadHelper {
     private Context mContext;
     private static HashMap<Long, ImageStatusObject> listOfQueuedDownloads = new HashMap<>();
     private ChatMediaDaoMiddleware chatMediaDaoMiddleware;
-
+    private SharedPreferences sharedPreferences;
 
     private BroadcastReceiver onDownloadComplete = new BroadcastReceiver() {
         @Override
@@ -83,8 +87,40 @@ public class DownloadHelper {
         this.mContext = context;
         chatMediaDaoMiddleware = ChatMediaDaoMiddleware.getInstance(context);
         dm = (DownloadManager) this.mContext.getApplicationContext().getSystemService(Context.DOWNLOAD_SERVICE);
-        context.registerReceiver(onDownloadComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-        context.registerReceiver(networkStateReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+        sharedPreferences = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+    }
+
+    public void registerReceiver(){
+        this.mContext.registerReceiver(onDownloadComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+        this.mContext.registerReceiver(networkStateReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+    }
+
+    public void checkPreferences(){
+
+        List<String> removeTheseKeys = new ArrayList<>();
+
+        Map<String, ?> all = sharedPreferences.getAll();
+        for(Map.Entry<String,?> entry : all.entrySet()){
+            Cursor cursor = this.dm.query(new DownloadManager.Query().setFilterById(Long.parseLong(entry.getKey())));
+            if(cursor.moveToFirst()){
+                int status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS));
+                if(status == DownloadManager.STATUS_SUCCESSFUL){
+                    removeTheseKeys.add(entry.getKey());
+                    String path = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
+                    chatMediaDaoMiddleware.updateMediaByID(path, entry.getValue().toString(), ImageStatusObject.DOWNLOAD_DONE);
+                }
+                else if(status == DownloadManager.STATUS_RUNNING){
+                    chatMediaDaoMiddleware.updateMediaByID(null, entry.getValue().toString(), ImageStatusObject.DOWNLOAD_PROCESS);
+                }
+                else{
+                    chatMediaDaoMiddleware.updateMediaByID(null, entry.getValue().toString(), ImageStatusObject.DOWNLOAD_RETRY);
+                }
+            }
+        }
+
+        for(String s: removeTheseKeys){
+            sharedPreferences.edit().remove(s).apply();
+        }
     }
 
     private String getPath(boolean isVideo, String filename){
@@ -119,6 +155,8 @@ public class DownloadHelper {
         img.setState(ImageStatusObject.DOWNLOAD_PROCESS);
         updateStatus(img);
         listOfQueuedDownloads.put(downloadID, img);
+
+        sharedPreferences.edit().putString(String.valueOf(downloadID), String.valueOf(img.getId())).apply();
 
     }
 

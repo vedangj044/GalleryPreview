@@ -25,11 +25,11 @@ public class ChatActivity extends AppCompatActivity {
         chatRecycle.setLayoutManager(lp);
 
         int groupID = getIntent().getIntExtra("groupID", 0);
-        downloadHelper = new DownloadHelper(this);
         UploadHelper uploadHelper = new UploadHelper(this);
 
         uploadHelper.enqueue(groupID);
 
+        downloadHelper = new DownloadHelper(this);
         ChatMediaViewModel viewModel = new ViewModelProvider(this).get(ChatMediaViewModel.class);
         pagedListAdapter = new ChatMediaPagedListAdapter(new ImageStatusObjectDiffCallback(), downloadHelper, uploadHelper);
         chatRecycle.setAdapter(pagedListAdapter);
@@ -51,7 +51,8 @@ public class ChatActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-        downloadHelper = new DownloadHelper(this);
+        this.downloadHelper.checkPreferences();
+        this.downloadHelper.registerReceiver();
         super.onResume();
     }
 

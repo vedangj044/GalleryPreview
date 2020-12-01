@@ -16,9 +16,6 @@ public interface MediaUploadDAO {
     @Query("SELECT * FROM chatMedia WHERE groupID == :id")
     List<ImageStatusObject> getMediaByGroup(int id);
 
-    @Query("SELECT COUNT(*) FROM chatMedia WHERE groupID == :id")
-    LiveData<Integer> getCountByGroupID(int id);
-
     @Update
     int update(ImageStatusObject imageStatusObject);
 
@@ -34,4 +31,9 @@ public interface MediaUploadDAO {
     @Query("UPDATE chatMedia SET state = 2 WHERE state = 1")
     void cancelAllUploads();
 
+    @Query("UPDATE chatMedia SET state = :resp WHERE id = :id")
+    void updateById(int resp, int id);
+
+    @Query("UPDATE chatMedia SET imageURL = :filepath WHERE id = :id")
+    void updateFilePath(String filepath, int id);
 }

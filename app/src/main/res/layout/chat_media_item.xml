@@ -6,6 +6,15 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
+    <ViewStub
+        android:id="@+id/date_view_stub"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout="@layout/date_section_header"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <ImageView
         android:id="@+id/background_image"
         android:layout_width="wrap_content"
@@ -18,7 +27,7 @@
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/date_view_stub"
         app:srcCompat="@drawable/ic_arrow_background"
         tools:srcCompat="@tools:sample/backgrounds/scenic" />
 
