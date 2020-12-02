@@ -34,7 +34,7 @@ public class ChatActivity extends AppCompatActivity {
 
         downloadHelper = new DownloadHelper(this);
         ChatMediaViewModel viewModel = new ViewModelProvider(this).get(ChatMediaViewModel.class);
-        pagedListAdapter = new ChatMediaPagedListAdapter(new ImageStatusObjectDiffCallback(), downloadHelper, uploadHelper);
+        pagedListAdapter = new ChatMediaPagedListAdapter(new ImageStatusObjectDiffCallback(), downloadHelper, uploadHelper, this);
         chatRecycle.setAdapter(pagedListAdapter);
 
         viewModel.getImageStatusObjectPaged().observe(this, imageStatusObjects -> pagedListAdapter.submitList(imageStatusObjects));

@@ -1,5 +1,7 @@
 package com.vedangj044.gallerypreview;
 
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Base64;
@@ -33,11 +35,13 @@ public class ChatMediaPagedListAdapter extends PagedListAdapter<ImageStatusObjec
     private static final int TYPE_MEDIA_RECEIVER = 2;
     private DownloadHelper downloadHelper;
     private UploadHelper uploadHelper;
+    private Context context;
 
-    protected ChatMediaPagedListAdapter(@NonNull DiffUtil.ItemCallback<ImageStatusObject> diffCallback, DownloadHelper downloadHelper, UploadHelper uploadHelper) {
+    protected ChatMediaPagedListAdapter(@NonNull DiffUtil.ItemCallback<ImageStatusObject> diffCallback, DownloadHelper downloadHelper, UploadHelper uploadHelper, Context context) {
         super(diffCallback);
         this.downloadHelper = downloadHelper;
         this.uploadHelper = uploadHelper;
+        this.context = context;
     }
 
     @NonNull
@@ -103,13 +107,10 @@ public class ChatMediaPagedListAdapter extends PagedListAdapter<ImageStatusObjec
 
                     hold.thumbnailImage.setImageBitmap(setThumbnail(img.getThumbnailURL()));
                     hold.retryButton.setImageResource(R.drawable.ic_download_foreground);
-                    hold.retryButton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            downloadHelper.enqueue(img);
-                            hold.retryButton.setVisibility(View.GONE);
-                            hold.uploadProgress.setVisibility(View.VISIBLE);
-                        }
+                    hold.retryButton.setOnClickListener(v -> {
+                        downloadHelper.enqueue(img);
+                        hold.retryButton.setVisibility(View.GONE);
+                        hold.uploadProgress.setVisibility(View.VISIBLE);
                     });
 
                     visibilityStateArray = "VVG";
@@ -126,6 +127,7 @@ public class ChatMediaPagedListAdapter extends PagedListAdapter<ImageStatusObjec
                     if (img.getVideo()){
                         hold.thumbnailImage.setImageBitmap(setThumbnail(img.getThumbnailURL()));
                         hold.retryButton.setImageResource(R.drawable.ic_play_foreground);
+                        hold.retryButton.setOnClickListener(v -> startPlayback(img.getImageURL()));
                         visibilityStateArray = "VVG";
                     }
                     else{
@@ -173,6 +175,7 @@ public class ChatMediaPagedListAdapter extends PagedListAdapter<ImageStatusObjec
                     if (img.getVideo()) {
                         hold.thumbnailImage.setImageBitmap(setThumbnail(img.getThumbnailURL()));
                         hold.retryButton.setImageResource(R.drawable.ic_play_foreground);
+                        hold.retryButton.setOnClickListener(v -> startPlayback(img.getImageURL()));
                         visibilityStateArray = "VVG";
                     } else {
                         hold.originalImage.setImageBitmap(BitmapFactory.decodeFile(img.getImageURL()));
@@ -276,6 +279,12 @@ public class ChatMediaPagedListAdapter extends PagedListAdapter<ImageStatusObjec
 
     public void setChangeDateListener(ChangeDateListener listener){
         this.listener = listener;
+    }
+
+    private void startPlayback(String path){
+        Intent intent = new Intent(context.getApplicationContext(), VideoPlayerActivity.class);
+        intent.putExtra("path", path);
+        context.startActivity(intent);
     }
 
     @Override
