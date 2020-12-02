@@ -50,6 +50,9 @@ public class ImageStatusObject {
     @ColumnInfo(name = "isSender")
     private boolean isSender;
 
+    @ColumnInfo(name = "timeStamp")
+    private Long timeStamp;
+
     public ImageStatusObject(String thumbnailURL, String imageURL, Boolean isVideo, String fileName, int groupID, boolean isSender) {
         this.thumbnailURL = thumbnailURL;
         ImageURL = imageURL;
@@ -57,6 +60,8 @@ public class ImageStatusObject {
         this.groupID = groupID;
         this.fileName = fileName;
         this.isSender = isSender;
+
+        this.timeStamp = System.currentTimeMillis();
 
         if(isSender){
             this.state = UPLOAD_PROCESS;
@@ -124,6 +129,14 @@ public class ImageStatusObject {
 
     public void setSender(boolean sender) {
         isSender = sender;
+    }
+
+    public Long getTimeStamp() {
+        return timeStamp;
+    }
+
+    public void setTimeStamp(Long timeStamp) {
+        this.timeStamp = timeStamp;
     }
 
     @NonNull

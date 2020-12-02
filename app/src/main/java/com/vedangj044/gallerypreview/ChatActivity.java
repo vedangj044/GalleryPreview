@@ -1,8 +1,10 @@
 package com.vedangj044.gallerypreview;
 
 import android.os.Bundle;
-import android.os.CountDownTimer;
+import android.view.View;
+import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -20,6 +22,7 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
         RecyclerView chatRecycle = findViewById(R.id.chat_recycle);
+        TextView dateDisplay = findViewById(R.id.date_display);
 
         LinearLayoutManager lp = new LinearLayoutManager(this, RecyclerView.VERTICAL, true);
         chatRecycle.setLayoutManager(lp);
@@ -46,6 +49,19 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
+        pagedListAdapter.setChangeDateListener(dateDisplay::setText);
+
+        chatRecycle.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                if(newState == RecyclerView.SCROLL_STATE_DRAGGING){
+                    dateDisplay.setVisibility(View.VISIBLE);
+                }
+                else{
+                    dateDisplay.setVisibility(View.GONE);
+                }
+            }
+        });
 
     }
 

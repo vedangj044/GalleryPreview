@@ -7,9 +7,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewStub;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -17,6 +19,10 @@ import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.paging.PagedListAdapter;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 
 import retrofit2.http.POST;
 
@@ -72,10 +78,23 @@ public class ChatMediaPagedListAdapter extends PagedListAdapter<ImageStatusObjec
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
 
         ImageStatusObject img = getItem(position);
+        String dataHeader = isDateHeaderVisible(position);
+
+        if(dataHeader != null){
+            listener.change(dataHeader);
+        }
 
         if(getItemViewType(position) == TYPE_MEDIA_RECEIVER){
 
             MediaViewHolderReceiver hold = (MediaViewHolderReceiver) holder;
+
+            if(dataHeader != null){
+                hold.dateTextView.setText(dataHeader);
+                hold.dateTextView.setVisibility(View.VISIBLE);
+            }
+            else{
+                hold.dateTextView.setVisibility(View.GONE);
+            }
 
             switch (img.getState()){
 
@@ -132,6 +151,13 @@ public class ChatMediaPagedListAdapter extends PagedListAdapter<ImageStatusObjec
         }
         else {
             MediaViewHolderSender hold = (MediaViewHolderSender) holder;
+            if(dataHeader != null){
+                hold.dateTextView.setText(dataHeader);
+                hold.dateTextView.setVisibility(View.VISIBLE);
+            }
+            else {
+                hold.dateTextView.setVisibility(View.GONE);
+            }
 
             switch (img.getState()) {
                 case ImageStatusObject.UPLOAD_PROCESS:
@@ -188,6 +214,70 @@ public class ChatMediaPagedListAdapter extends PagedListAdapter<ImageStatusObjec
         return BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
     }
 
+
+    private String isDateHeaderVisible(int position){
+
+        boolean isDateHeaderVisible = false;
+
+        Calendar dateNow = Calendar.getInstance();
+        dateNow.setTime(new Date(getItem(position).getTimeStamp()));
+
+        Calendar dateNext = Calendar.getInstance();
+        if(position == getItemCount() - 1){
+            isDateHeaderVisible = true;
+        }
+        else{
+            dateNext.setTime(new Date(getItem(position + 1).getTimeStamp()));
+            if(dateNow.get(Calendar.YEAR) != dateNext.get(Calendar.YEAR) ||
+                    dateNow.get(Calendar.MONTH) != dateNext.get(Calendar.MONTH) ||
+                    dateNow.get(Calendar.DATE) != dateNext.get(Calendar.DATE)){
+                isDateHeaderVisible = true;
+            }
+        }
+
+        if(isDateHeaderVisible){
+            String date = dateNow.get(Calendar.DATE) +"/"+ dateNow.get(Calendar.MONTH)+ "/" + dateNow.get(Calendar.YEAR);
+
+            if(isToday(date)){
+                return "Today";
+            }
+            else if(isYesterday(date)){
+                return "Yesterday";
+            }
+            else{
+                return date;
+            }
+        }
+        return null;
+    }
+
+    private boolean isToday(String date){
+        Calendar today = Calendar.getInstance();
+        today.setTime(new Date(System.currentTimeMillis()));
+
+        String var = today.get(Calendar.DATE) + "/" + today.get(Calendar.MONTH) + "/" + today.get(Calendar.YEAR);
+        return var.equals(date);
+    }
+
+    private boolean isYesterday(String date){
+        Calendar yesterday = Calendar.getInstance();
+        yesterday.setTime(new Date(System.currentTimeMillis()));
+        yesterday.add(Calendar.DAY_OF_MONTH, -1);
+
+        String var = yesterday.get(Calendar.DATE) + "/" + yesterday.get(Calendar.MONTH) + "/" + yesterday.get(Calendar.YEAR);
+        return var.equals(date);
+    }
+
+    public interface ChangeDateListener{
+        void change(String date);
+    }
+
+    private ChangeDateListener listener;
+
+    public void setChangeDateListener(ChangeDateListener listener){
+        this.listener = listener;
+    }
+
     @Override
     public int getItemCount() {
         return super.getItemCount();
@@ -200,6 +290,7 @@ public class ChatMediaPagedListAdapter extends PagedListAdapter<ImageStatusObjec
         ProgressBar uploadProgress;
         ImageView originalImage;
         ConstraintLayout layout;
+        TextView dateTextView;
 
         public MediaViewHolderReceiver(@NonNull View itemView) {
             super(itemView);
@@ -209,7 +300,7 @@ public class ChatMediaPagedListAdapter extends PagedListAdapter<ImageStatusObjec
             uploadProgress = itemView.findViewById(R.id.upload_progress);
             originalImage = itemView.findViewById(R.id.background_image);
             layout = itemView.findViewById(R.id.layout_item);
-
+            dateTextView = itemView.findViewById(R.id.date_text_view);
         }
     }
 
@@ -220,6 +311,7 @@ public class ChatMediaPagedListAdapter extends PagedListAdapter<ImageStatusObjec
         ProgressBar uploadProgress;
         ImageView originalImage;
         ConstraintLayout layout;
+        TextView dateTextView;
 
         public MediaViewHolderSender(@NonNull View itemView) {
             super(itemView);
@@ -229,6 +321,7 @@ public class ChatMediaPagedListAdapter extends PagedListAdapter<ImageStatusObjec
             uploadProgress = itemView.findViewById(R.id.upload_progress);
             originalImage = itemView.findViewById(R.id.background_image);
             layout = itemView.findViewById(R.id.layout_item);
+            dateTextView = itemView.findViewById(R.id.date_text_view);
 
         }
     }

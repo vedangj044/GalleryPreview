@@ -94,6 +94,7 @@ public class UploadHelper {
                 finalI.setId(finalI.getId()+1);
                 finalI.setState(ImageStatusObject.DOWNLOAD_NOT_STARTED);
                 finalI.setSender(false);
+                finalI.setTimeStamp(1607076150000L);
                 finalI.setImageURL("https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4");
                 finalI.setVideo(true);
                 finalI.setFileName("videoOne.mp4");
