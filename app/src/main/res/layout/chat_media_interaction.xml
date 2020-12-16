@@ -14,38 +14,23 @@
         android:textAlignment="center"
         android:textSize="18sp"
         android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/thumbnail_image_media"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
-        android:id="@+id/background_image"
+        android:id="@+id/thumbnail_image_media"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="5dp"
-        android:layout_marginBottom="2dp"
+        android:contentDescription="@string/thunbnail"
         android:minWidth="100dp"
         android:minHeight="100dp"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/date_text_view"
-        app:srcCompat="@drawable/ic_arrow_background"
-        tools:srcCompat="@tools:sample/backgrounds/scenic" />
-
-    <ImageView
-        android:id="@+id/thumbnail_image_media"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:contentDescription="@string/thunbnail"
         android:scaleType="centerCrop"
         android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="@id/background_image"
-        app:layout_constraintEnd_toEndOf="@id/background_image"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="@id/background_image"
-        app:layout_constraintTop_toTopOf="@id/background_image"
-        app:layout_constraintVertical_bias="1.0"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         tools:srcCompat="@tools:sample/avatars" />
 
     <ProgressBar
@@ -54,10 +39,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@+id/background_image"
-        app:layout_constraintEnd_toEndOf="@+id/background_image"
-        app:layout_constraintStart_toStartOf="@+id/background_image"
-        app:layout_constraintTop_toTopOf="@+id/background_image" />
+        app:layout_constraintBottom_toBottomOf="@+id/thumbnail_image_media"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/thumbnail_image_media"
+        app:layout_constraintTop_toTopOf="@+id/thumbnail_image_media" />
 
     <ImageView
         android:id="@+id/retry_button"
@@ -65,9 +50,9 @@
         android:layout_height="wrap_content"
         android:contentDescription="@string/thunbnail"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/background_image"
-        app:layout_constraintStart_toStartOf="@+id/background_image"
-        app:layout_constraintTop_toTopOf="@+id/background_image"
+        app:layout_constraintBottom_toBottomOf="@+id/thumbnail_image_media"
+        app:layout_constraintEnd_toEndOf="@+id/thumbnail_image_media"
+        app:layout_constraintStart_toStartOf="@+id/thumbnail_image_media"
+        app:layout_constraintTop_toTopOf="@+id/thumbnail_image_media"
         app:srcCompat="@drawable/ic_retry_foreground" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -3,6 +3,7 @@ package com.vedangj044.gallerypreview;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.media.ThumbnailUtils;
 import android.os.CancellationSignal;
 import android.provider.MediaStore;
@@ -56,7 +57,46 @@ public class SlideImageHelper {
     }
 
     // returns compressed/scaled bitmap
-    public Bitmap getCompressedBitmap(Bitmap bmp){
+    public Bitmap getCompressedBitmap(String path, Bitmap bmp){
+
+        Bitmap scaled = null;
+
+        try {
+            ExifInterface ei = new ExifInterface(path);
+
+            int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
+
+
+            switch (orientation) {
+                case ExifInterface.ORIENTATION_ROTATE_90:
+                    scaled = rotatedImage(bmp, 90);
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_180:
+                    scaled = rotatedImage(bmp, 180);
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_270:
+                    scaled = rotatedImage(bmp, 270);
+                case ExifInterface.ORIENTATION_NORMAL:
+                default:
+                    scaled = rotatedImage(bmp, 0);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return scaled;
+    }
+
+    // rotate image based on Exif interface
+    private Bitmap rotatedImage(Bitmap bmp, int angle){
+        Matrix matrix = new Matrix();
+        matrix.postRotate(angle);
+        return scaledBitmap(Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(),
+                matrix, true));
+    }
+
+    private Bitmap scaledBitmap(Bitmap bmp){
         // compression of image happens here
         int nh = (int) ( bmp.getHeight() * (512.0 / bmp.getWidth()) );
         Bitmap scaled = Bitmap.createScaledBitmap(bmp, 512, nh, true);

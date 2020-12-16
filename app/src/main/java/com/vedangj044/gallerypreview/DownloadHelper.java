@@ -113,6 +113,7 @@ public class DownloadHelper {
                     chatMediaDaoMiddleware.updateMediaByID(null, entry.getValue().toString(), ImageStatusObject.DOWNLOAD_PROCESS);
                 }
                 else{
+                    removeTheseKeys.add(entry.getKey());
                     chatMediaDaoMiddleware.updateMediaByID(null, entry.getValue().toString(), ImageStatusObject.DOWNLOAD_RETRY);
                 }
             }

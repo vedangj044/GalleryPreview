@@ -131,7 +131,6 @@ public class ChatMediaPagedListAdapter extends PagedListAdapter<ImageStatusObjec
                         visibilityStateArray = "VVG";
                     }
                     else{
-                        hold.originalImage.setImageBitmap(BitmapFactory.decodeFile(img.getImageURL()));
                         hold.thumbnailImage.setImageBitmap(BitmapFactory.decodeFile(img.getImageURL()));
                         visibilityStateArray = "VGG";
                     }
@@ -163,10 +162,7 @@ public class ChatMediaPagedListAdapter extends PagedListAdapter<ImageStatusObjec
 
             switch (img.getState()) {
                 case ImageStatusObject.UPLOAD_PROCESS:
-                    if (!img.getVideo()) {
-                        hold.originalImage.setImageBitmap(BitmapFactory.decodeFile(img.getImageURL()));
-                    }
-                    hold.thumbnailImage.setImageBitmap(setThumbnail(img.getThumbnailURL()));
+                    hold.thumbnailImage.setImageBitmap(BitmapFactory.decodeFile(img.getImageURL()));
                     visibilityStateArray = "VGV";
                     break;
 
@@ -178,7 +174,6 @@ public class ChatMediaPagedListAdapter extends PagedListAdapter<ImageStatusObjec
                         hold.retryButton.setOnClickListener(v -> startPlayback(img.getImageURL()));
                         visibilityStateArray = "VVG";
                     } else {
-                        hold.originalImage.setImageBitmap(BitmapFactory.decodeFile(img.getImageURL()));
                         hold.thumbnailImage.setImageBitmap(BitmapFactory.decodeFile(img.getImageURL()));
                         visibilityStateArray = "VGG";
                     }
@@ -271,6 +266,8 @@ public class ChatMediaPagedListAdapter extends PagedListAdapter<ImageStatusObjec
         return var.equals(date);
     }
 
+    // interface used to change the date on the date header
+    // implemented in chatactivity
     public interface ChangeDateListener{
         void change(String date);
     }
@@ -292,12 +289,13 @@ public class ChatMediaPagedListAdapter extends PagedListAdapter<ImageStatusObjec
         return super.getItemCount();
     }
 
+    // We have separate view holder for recevier and send media
+    // but their members are same
     public static class MediaViewHolderReceiver extends RecyclerView.ViewHolder{
 
         ImageView thumbnailImage;
         ImageView retryButton;
         ProgressBar uploadProgress;
-        ImageView originalImage;
         ConstraintLayout layout;
         TextView dateTextView;
 
@@ -307,7 +305,6 @@ public class ChatMediaPagedListAdapter extends PagedListAdapter<ImageStatusObjec
             thumbnailImage = itemView.findViewById(R.id.thumbnail_image_media);
             retryButton = itemView.findViewById(R.id.retry_button);
             uploadProgress = itemView.findViewById(R.id.upload_progress);
-            originalImage = itemView.findViewById(R.id.background_image);
             layout = itemView.findViewById(R.id.layout_item);
             dateTextView = itemView.findViewById(R.id.date_text_view);
         }
@@ -318,7 +315,6 @@ public class ChatMediaPagedListAdapter extends PagedListAdapter<ImageStatusObjec
         ImageView thumbnailImage;
         ImageView retryButton;
         ProgressBar uploadProgress;
-        ImageView originalImage;
         ConstraintLayout layout;
         TextView dateTextView;
 
@@ -328,7 +324,6 @@ public class ChatMediaPagedListAdapter extends PagedListAdapter<ImageStatusObjec
             thumbnailImage = itemView.findViewById(R.id.thumbnail_image_media);
             retryButton = itemView.findViewById(R.id.retry_button);
             uploadProgress = itemView.findViewById(R.id.upload_progress);
-            originalImage = itemView.findViewById(R.id.background_image);
             layout = itemView.findViewById(R.id.layout_item);
             dateTextView = itemView.findViewById(R.id.date_text_view);
 

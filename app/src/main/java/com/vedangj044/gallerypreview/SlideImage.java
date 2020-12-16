@@ -263,7 +263,7 @@ public class SlideImage extends AppCompatActivity {
                     else{
 
                         // Creating compressed bitmap
-                        Bitmap compressedBitmap = slideImageHelper.getCompressedBitmap(BitmapFactory.decodeFile(m1.getPath()));
+                        Bitmap compressedBitmap = slideImageHelper.getCompressedBitmap(m1.getPath(), BitmapFactory.decodeFile(m1.getPath()));
 
                         // Saving compressed bitmap
                         File file = getApplicationContext().getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
@@ -433,8 +433,9 @@ public class SlideImage extends AppCompatActivity {
 
             }
             else{
-                Bitmap bmp = BitmapFactory.decodeFile(mediaPreviewsList.get(position).getPath());
-                holder.imageView.setImageBitmap(bmp);
+                Glide.with(holder.context)
+                        .load(mediaPreviewsList.get(position).getPath())
+                        .into(holder.imageView);
                 rotate_button.setVisibility(View.VISIBLE);
                 holder.videoView.setVisibility(View.GONE);
                 holder.imageView.setVisibility(View.VISIBLE);
@@ -469,12 +470,14 @@ public class SlideImage extends AppCompatActivity {
             ImageView imageView;
             VideoView videoView;
             ImageView playPause;
+            Context context;
 
             public ViewHolder(@NonNull View itemView) {
                 super(itemView);
                 imageView = itemView.findViewById(R.id.image_status);
                 videoView = itemView.findViewById(R.id.video_status);
                 playPause = itemView.findViewById(R.id.play_pause);
+                context = itemView.getContext();
             }
         }
 

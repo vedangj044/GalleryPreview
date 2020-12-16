@@ -88,7 +88,6 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         ImageView thumbnailImage;
         ImageView retryButton;
         ProgressBar uploadProgress;
-        ImageView originalImage;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -96,7 +95,6 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
             thumbnailImage = itemView.findViewById(R.id.thumbnail_image_media);
             retryButton = itemView.findViewById(R.id.retry_button);
             uploadProgress = itemView.findViewById(R.id.upload_progress);
-            originalImage = itemView.findViewById(R.id.background_image);
 
         }
     }
